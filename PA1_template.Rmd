@@ -7,79 +7,19 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r echo = TRUE}
-# Read data from CSV
-data <- read.csv(unz("activity.zip", "activity.csv"),
-                 header=TRUE,
-                 sep=",",
-                 na.strings="NA")
-# Convert dates
-data$date <- as.Date(data$date, format="%Y-%m-%d")
-```
+
+
 
 ## What is mean total number of steps taken per day?
-```{r echo = TRUE, warning = FALSE, message = FALSE}
-library(dplyr)
-```
-```{r echo = TRUE}
-# Calculate total steps per day
-steps_by_date <- summarize(group_by(data, date), ttl_steps = sum(steps))
-# Make histogram
-hist(steps_by_date$ttl_steps, main = "Steps per Day", xlab = "Steps per Day")
-# Calculate mean ...
-mean(steps_by_date$ttl_steps, na.rm = TRUE)
-# ... and median
-median(steps_by_date$ttl_steps, na.rm = TRUE)
-```
+
+
 
 ## What is the average daily activity pattern?
-```{r echo = TRUE}
-# Calculate average steps per interval
-avg_steps_by_interval <-
-    summarize(group_by(data, interval),
-    avg_steps = mean(steps, na.rm = TRUE))
-# Make plot
-with(avg_steps_by_interval, plot(interval, avg_steps, type = "l",
-                                 xlab = "5-minute Interval",
-                                 ylab = "Average Steps"))
-# Find 5-minute interval with max steps
-avg_steps_by_interval$interval[avg_steps_by_interval$avg_steps == max(avg_steps_by_interval$avg_steps)]
-```
+
+
 
 ## Imputing missing values
-```{r echo = TRUE}
-# Count NAs
-sum(is.na(data$steps))
 
-# Replace NAs with mean value for current interval
-data_full <-
-    mutate(group_by(data, interval), steps =
-               ifelse(is.na(steps), ceiling(mean(steps, na.rm = TRUE)), steps))
-steps_by_date <- summarize(group_by(data_full, date), ttl_steps = sum(steps))
-# Make histogram
-hist(steps_by_date$ttl_steps, main = "Steps per Day", xlab = "Steps per Day")
-# Calculate mean ...
-mean(steps_by_date$ttl_steps, na.rm = TRUE)
-# ... and median
-median(steps_by_date$ttl_steps, na.rm = TRUE)
-```
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r echo = TRUE}
-# Make factor variable
-data_full$day_type <- as.factor(format(data_full$date, "%u") %in% c(6, 7))
-levels(data_full$day_type) <- c("weekday","weekend")
-
-library(ggplot2)
-avg_steps_by_interval <-
-    summarize(group_by(data_full, day_type, interval), avg_steps = mean(steps, na.rm = TRUE))
-# Make plot
-ggplot(avg_steps_by_interval, aes(interval, avg_steps)) +
-    geom_line() +
-    facet_grid(day_type~.) +
-    xlab("5-minute Interval") + 
-    ylab("Average Steps") +
-    theme(plot.title = element_text(hjust = 0.5))
-```
-
-Conclusion: activity pattern is more even on weekend than on weekday
